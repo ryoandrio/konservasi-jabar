@@ -1,0 +1,202 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>WebGIS Konservasi Jawa Barat</title>
+
+    <style>
+      #heading {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #0098db;
+      }
+
+      .header {
+        text-align: left;
+        background: #1abc9c;
+        color: rgb(255, 255, 255);
+        height: 44px;
+        display: flex;
+        align-items: center;
+        font-weight: bolder;
+        font-size: 24pt;
+        padding-left: 16px;
+      }
+
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: calc(100% - 44px);
+        width: 100%;
+      }
+    </style>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.23/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.23/"></script>
+  </head>
+
+  <body>
+    <div class="header">WebGIS Konservasi Jawa Barat</div>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/layers/FeatureLayer",
+        "esri/views/MapView",
+        "esri/widgets/Legend",
+        "esri/widgets/BasemapToggle",
+        "esri/widgets/Locate",
+        "esri/widgets/ScaleBar",
+        "esri/widgets/Search",
+        "esri/widgets/Compass",
+        "esri/widgets/Editor",
+        "esri/widgets/LayerList",
+        "esri/widgets/Expand",
+        "esri/widgets/Print"
+      ], (
+        Map,
+        FeatureLayer,
+        MapView,
+        Legend,
+        BasemapToggle,
+        Locate,
+        ScaleBar,
+        Search,
+        Compass,
+        Editor,
+        LayerList,
+        Expand,
+        Print
+      ) => {
+        // Create the map
+        const map = new Map({
+          basemap: "arcgis-topographic",
+        });
+
+        // Create the MapView
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [107.55890388668566, -6.912671071687469],
+          zoom: 9,
+        });
+
+        //LAYER LIST
+        view.when(() => {
+          const layerList = new Expand({
+            content: new LayerList({
+              view: view,
+              style: "card",
+            }),
+            expandTooltip: "Layer",
+            view: view,
+          });
+          view.ui.add(layerList, "top-right");
+        });
+
+        //SCALEBAR
+        const scalebar = new ScaleBar({
+          view: view,
+          unit: "metric",
+        });
+        view.ui.add(scalebar, "bottom-right");
+
+        //SEARCH WIDGET
+        const search = new Search({
+          view: view,
+        });
+        view.ui.add(search, "top-right");
+
+        //LOCATE WIDGET
+        const locateBtn = new Locate({
+          view: view,
+        });
+        view.ui.add(locateBtn, "top-left");
+
+        const compassWidget = new Compass({
+          view: view,
+        });
+        view.ui.add(compassWidget, "top-left");
+
+        //LEGEND WIDGET
+        const legend = new Expand({
+          content: new Legend({
+            view: view,
+            style: "card",
+          }),
+          expandTooltip: "Legend",
+          view: view,
+          expanded: true,
+        });
+        view.ui.add(legend, "bottom-left");
+
+        //EDITOR WIDGET
+        const editor = new Expand({
+          content: new Editor({
+            view: view,
+            style: "card",
+          }),
+          expandTooltip: "Editor",
+          view: view,
+        });
+        view.ui.add(editor, "top-right");
+
+        //BASEMAP WIDGET
+        const toggle = new Expand({
+          content: new BasemapToggle({
+            view: view,
+            nextBasemap: "hybrid",
+            style: "card",
+          }),
+          expandTooltip: "Basemap",
+          view: view,
+        });
+        view.ui.add(toggle, "top-right");
+
+        //PRINT WIDGET
+        view.when(() => {
+          const print = new Expand({
+            content: new Print({
+            view: view,
+            printServiceUrl: "https://utility.arcgisonline.com/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task"
+          }),
+            expandTooltip: "Print",
+            view: view,
+          });
+          view.ui.add(print, "top-right");
+        });
+
+        //ADD LAYER
+        const adminjabar = new FeatureLayer({
+          url: "https://services3.arcgis.com/VFq4ZNL4ohXxN8gl/arcgis/rest/services/Batas_Adminstrasi_Jawa_Barat/FeatureServer",
+        });
+        map.add(adminjabar);
+
+        const konservasi = new FeatureLayer({
+          url: "https://services3.arcgis.com/VFq4ZNL4ohXxN8gl/arcgis/rest/services/Titik_Konservasi_Jabar/FeatureServer",
+          popupTemplate: {
+            title: "{Nama}",
+            content: [
+              {
+                type: "text",
+                text: "{Nama} merupakan sebuah kawasan konservasi {Tipe} yang berada di {Lokasi}, Jawa Barat. Kawasan {Jenis} dengan luas sebesar {Luas__Ha_} Ha tersebut didirikan pada {Tahun_berd}.",
+              },
+            ],
+          },
+        });
+        map.add(konservasi);
+
+        
+      });
+    </script>
+    <div id="viewDiv"></div>
+  </body>
+</html>
